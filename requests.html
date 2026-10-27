@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Requests - CRAFT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <h1>Requests</h1>
+    <p>See what classmates need. No search or filters are needed.</p>
+
+    <div id="request-list" aria-live="polite" aria-label="Student requests">
+      <div class="empty">
+        <h3>Loading requests...</h3>
+        <p>Please wait while CRAFT loads the request list.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/requests.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post a Request - CRAFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main>
+<h1>Post a Request</h1>
+<p>Tell classmates what you need and choose a campus collection point.</p>
+<div class="notice" role="note">Form update in progress: location, dates and emergency saving will be connected in the next JavaScript step. Please wait before submitting a new request.</div>
+<form class="form card" id="request-form" novalidate>
+  <div class="field"><label for="title">Item name</label><input id="title" name="title" maxlength="80" required><div class="field-error" data-error-for="title"></div></div>
+  <div class="field"><label for="description">Description</label><textarea id="description" name="description" maxlength="500" required></textarea><div class="field-error" data-error-for="description"></div></div>
+  <div class="field"><label for="category">Category</label>
+    <select id="category" name="category" required><option value="">Choose…</option><option>Books</option><option>Notes</option><option>Electronics</option><option>Lab equipment</option><option>Stationery</option><option>Other</option></select>
+    <div class="field-error" data-error-for="category"></div></div>
+  <div class="field"><label for="requestType">Request type</label>
+    <select id="requestType" name="requestType" required><option value="">Choose…</option><option value="lend">Loan (I will return it)</option><option value="free">Give Free (to keep)</option></select>
+    <div class="field-error" data-error-for="requestType"></div></div>
+  <div class="field"><label for="location">Campus collection location</label><input id="location" name="location" maxlength="120" placeholder="e.g. College library or canteen" aria-describedby="location-help" required><p id="location-help">Enter a campus meeting point manually. No home address or live GPS is needed.</p><div class="field-error" data-error-for="location"></div></div>
+  <div class="field"><label for="neededAt">Needed on (date and time)</label><input id="neededAt" name="neededAt" type="datetime-local" required><div class="field-error" data-error-for="neededAt"></div></div>
+  <div class="field"><label for="returnAt">Needed until / return by (date and time)</label><input id="returnAt" name="returnAt" type="datetime-local" aria-describedby="until-help" required><p id="until-help">For a loan, enter when you will return the item. For Give Free, enter the latest time you need to receive it.</p><div class="field-error" data-error-for="returnAt"></div></div>
+  <div class="field check"><input id="isEmergency" name="isEmergency" type="checkbox"><label for="isEmergency">Emergency (show this request first)</label></div>
+  <button class="btn" type="submit" disabled>Post request (saving update next)</button>
+</form>
+</main>
+<footer id="site-footer"></footer>
+<script type="module" src="js/app.js"></script>
+<script type="module" src="js/forms.js"></script>
+</body>
+</html>

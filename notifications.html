@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications – CRAFT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main>
+<h1>Notifications</h1>
+<p>Updates about requests you posted. Only notifications addressed to your account are shown.</p>
+<div id="notifications-list" aria-live="polite"><div class="empty"><h3>Loading notifications...</h3></div></div>
+</main>
+<footer id="site-footer"></footer>
+<script type="module" src="js/app.js"></script>
+<script type="module">
+import { auth, db } from "./js/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const list = document.getElementById("notifications-list");
+let stopListening = null;
+let viewVersion = 0;
+function message(title, detail) {
+  const box = document.createElement("div"); box.className = "empty";
+  const heading = document.createElement("h3"); heading.textContent = title;
+  const paragraph = document.createElement("p"); paragraph.textContent = detail;
+  box.append(heading, paragraph); list.replaceChildren(box);
+}
+function milliseconds(value) {
+  return value && typeof value.toMillis === "function" ? value.toMillis() : 0;
+}
+function render(rows, user, version) {
+  list.replaceChildren();
+  if (!rows.length) { message("No notifications yet", "New acceptances of your requests will appear here."); return; }
+  rows.sort((a, b) => milliseconds(b.createdAt) - milliseconds(a.createdAt) || a.id.localeCompare(b.id));
+  rows.forEach(function (notice) {
+    const card = document.createElement("article");
+    card.className = "notification-card" + (notice.read === true ? "" : " unread");
+    const heading = document.createElement("h3");
+    heading.textContent = notice.read === true ? "Request accepted" : "New acceptance";
+    const paragraph = document.createElement("p");
+    paragraph.textContent = typeof notice.message === "string" ? notice.message : "A classmate accepted your request.";
+    card.append(heading, paragraph);
+    const time = milliseconds(notice.createdAt);
+    if (time) {
+      const date = document.createElement("p"); date.className = "notification-time";
+      date.textContent = new Date(time).toLocaleString(); card.appendChild(date);
+    }
+    if (notice.read !== true) {
+      const button = document.createElement("button"); button.className = "btn"; button.type = "button";
+      button.textContent = "Mark as read";
+      button.addEventListener("click", async function () {
+        if (version !== viewVersion || !auth.currentUser || auth.currentUser.uid !== user.uid) return;
+        button.disabled = true;
+        try { await updateDoc(doc(db, "notifications", notice.id), { read: true }); }
+        catch (error) {
+          console.error("Could not mark notification as read:", error);
+          if (version !== viewVersion) return;
+          button.disabled = false;
+          const feedback = document.createElement("p"); feedback.className = "error"; feedback.setAttribute("role", "alert");
+          feedback.textContent = "Could not mark as read. Check your connection and notification rules.";
+          card.querySelectorAll(".error").forEach(item => item.remove()); card.appendChild(feedback);
+        }
+      });
+      card.appendChild(button);
+    }
+    list.appendChild(card);
+  });
+}
+if (list) {
+  onAuthStateChanged(auth, function (user) {
+    viewVersion += 1; const version = viewVersion;
+    if (stopListening) { stopListening(); stopListening = null; }
+    if (!user) { message("Please log in", "Sign in to read notifications for your account."); return; }
+    message("Loading notifications...", "Checking updates for your account.");
+    const ownQuery = query(collection(db, "notifications"), where("userId", "==", user.uid));
+    stopListening = onSnapshot(ownQuery, function (snapshot) {
+      if (version !== viewVersion) return;
+      const rows = snapshot.docs.map(item => ({ ...item.data(), id: item.id }))
+        .filter(item => item.userId === user.uid);
+      render(rows, user, version);
+    }, function (error) {
+      if (version !== viewVersion) return;
+      console.error("Could not load notifications:", error);
+      message("Could not load notifications", error.code === "permission-denied"
+        ? "Check your login and that the new private notification rules were published."
+        : "Check your connection, then reload the page.");
+    });
+  }, function (error) {
+    viewVersion += 1;
+    if (stopListening) stopListening(); stopListening = null;
+    console.error("Could not check login:", error);
+    message("Could not check your login", "Reload the page and sign in again.");
+  });
+}
+
+</script>
+</body>
+</html>
